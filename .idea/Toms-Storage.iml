@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/Toms-Storage-1202" />
+      <excludeFolder url="file://$MODULE_DIR$/Toms-Storage-1204" />
+      <excludeFolder url="file://$MODULE_DIR$/Toms-Storage-1206" />
+      <excludeFolder url="file://$MODULE_DIR$/Toms-Storage-Fabric-1.20" />
+      <excludeFolder url="file://$MODULE_DIR$/Toms-Storage-Fabric-1.20.2" />
+      <excludeFolder url="file://$MODULE_DIR$/Toms-Storage-Fabric-1.20.4" />
+      <excludeFolder url="file://$MODULE_DIR$/Toms-Storage-Fabric-1.20.6" />
+      <excludeFolder url="file://$MODULE_DIR$/Toms-Storage-LexForge-1202" />
+      <excludeFolder url="file://$MODULE_DIR$/Toms-Storage-LexForge-1204" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
