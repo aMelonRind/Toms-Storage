@@ -36,7 +36,7 @@ jobs:
         run: chmod +x ./Toms-Storage-120/gradlew
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Assemble Forge
         run: ./Toms-Storage-120/gradlew -p ./Toms-Storage-120 assemble
