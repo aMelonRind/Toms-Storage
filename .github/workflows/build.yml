@@ -33,7 +33,7 @@ jobs:
           java-version: ${{ matrix.java }}
 
       - name: Change wrapper permissions
-        run: chmod +x ./gradlew
+        run: chmod +x ./Toms-Storage-120/gradlew
 
       - uses: actions/cache@v4
         with:
