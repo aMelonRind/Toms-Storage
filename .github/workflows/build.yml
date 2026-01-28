@@ -21,7 +21,7 @@ jobs:
             let file = fs.readFileSync(path).toString();
             const lines = file.split("\n").map(line => {
               if (line.trim().startsWith("mod_version=")) {
-                return `${line}-beta-${process.env.GITHUB_SHA.substring(0, 7)}`;
+                return `${line}-melo-${process.env.GITHUB_SHA.substring(0, 7)}`;
               }
               return line;
             });
