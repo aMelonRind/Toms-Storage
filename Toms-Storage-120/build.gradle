@@ -7,6 +7,7 @@ plugins {
 version = project.mod_version
 group = 'com.tom5454.toms_storage' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'toms_storage-1.20'
+def artifactBaseName = "${archivesBaseName}-${version}"
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -182,8 +183,9 @@ dependencies {
   	
   	runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.3.5+1.20.1:api")
-    
-    compileOnly fg.deobf("dev.emi:emi-forge:1.0.21+1.20.1:api")
+
+//    compileOnly fg.deobf("dev.emi:emi-forge:1.0.21+1.20.1:api")
+    compileOnly fg.deobf(files("emi-1.1.22-SNAPSHOT+1.20.1+forge-api.jar"))
 	runtimeOnly fg.deobf("dev.emi:emi-forge:1.0.21+1.20.1")
 	
 	implementation fg.deobf("curse.maven:polymorph-388800:5995253")
@@ -270,4 +272,12 @@ if (!useLib) {
 		dependsOn 'TomsStorage-120Client'
 		ignoreFailures true
 	}
+}
+
+tasks.register('printArtifactName') {
+    group = 'distribution'
+    description = 'Prints the canonical artifact name for CI workflows'
+    doLast {
+        println artifactBaseName
+    }
 }
