@@ -51,7 +51,8 @@ jobs:
         id: artifact_name
         shell: bash
         run: |
-          echo "value=$(./Toms-Storage-120/gradlew -p ./Toms-Storage-120 -q :printArtifactName)" >> "$GITHUB_OUTPUT"
+          value="$(./Toms-Storage-120/gradlew -p ./Toms-Storage-120 -q :printArtifactName)"
+          printf 'value=%s\n' "$value" >> "$GITHUB_OUTPUT"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4.4.0
