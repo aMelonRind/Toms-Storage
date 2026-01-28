@@ -7,9 +7,6 @@ jobs:
       matrix:
         java: [ 17 ]
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./Toms-Storage-120
     steps:
 
       - name: Checkout
@@ -20,7 +17,7 @@ jobs:
         with:
           script: |
             const fs = require("fs");
-            const path = "./gradle.properties";
+            const path = "./Toms-Storage-120/gradle.properties";
             let file = fs.readFileSync(path).toString();
             const lines = file.split("\n").map(line => {
               if (line.trim().startsWith("mod_version=")) {
@@ -36,7 +33,7 @@ jobs:
           java-version: ${{ matrix.java }}
 
       - name: Change wrapper permissions
-        run: chmod +x ./gradlew
+        run: chmod +x ./Toms-Storage-120/gradlew
 
       - uses: actions/cache@v4
         with:
@@ -48,16 +45,16 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Assemble Forge
-        run: ./gradlew assemble
+        run: ./Toms-Storage-120/gradlew assemble
 
       - name: Compute artifact name
         id: artifact_name
         shell: bash
         run: |
-          echo "value=$(./gradlew -q :printArtifactName)" >> "$GITHUB_OUTPUT"
+          echo "value=$(./Toms-Storage-120/gradlew -q :printArtifactName)" >> "$GITHUB_OUTPUT"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4.4.0
         with:
           name: ${{ steps.artifact_name.outputs.value }}
-          path: build/libs/
+          path: Toms-Storage-120/build/libs/
