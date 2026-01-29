@@ -2,13 +2,14 @@ package com.tom.storagemod.gui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.Minecraft;
@@ -71,6 +72,8 @@ public abstract class AbstractStorageTerminalScreen<T extends StorageTerminalMen
 	private static final LoadingCache<StoredItemStack, List<String>> tagCache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.SECONDS).build(CacheLoader.from(
 			key -> key.getStack().getTags().map(t -> t.location().toString()).toList()
 			));
+	public static final List<Renderable> postRenders = new ArrayList<>();
+	public static final List<Supplier<@Nullable Comparator<StoredItemStack>>> externalSortProviders = new ArrayList<>();
 	protected Minecraft mc = Minecraft.getInstance();
 
 	/** Amount scrolled in Creative mode inventory (0 = top, 1 = bottom) */
@@ -285,7 +288,7 @@ public abstract class AbstractStorageTerminalScreen<T extends StorageTerminalMen
 				}
 			} catch (Exception e) {
 			}
-			Collections.sort(getMenu().itemListClientSorted, menu.noSort ? sortComp : comparator);
+			getMenu().itemListClientSorted.sort(getSort());
 			if(!searchLast.equals(searchString)) {
 				getMenu().scrollTo(0);
 				this.currentScroll = 0;
@@ -304,6 +307,26 @@ public abstract class AbstractStorageTerminalScreen<T extends StorageTerminalMen
 			refreshItemList = false;
 			this.searchLast = searchString;
 		}
+	}
+
+	private Comparator<StoredItemStack> getSort() {
+		if (menu.noSort) return sortComp;
+		Comparator<StoredItemStack> sum = null;
+		for (Supplier<@Nullable Comparator<StoredItemStack>> supplier : externalSortProviders) {
+			Comparator<StoredItemStack> comp = supplier.get();
+			if (comp == null) continue;
+
+			if (sum == null) {
+				sum = comp;
+			} else {
+				sum = sum.thenComparing(comp);
+			}
+		}
+		return sum == null ? comparator : sum.thenComparing(comparator);
+	}
+
+	public void markDirty() {
+		refreshItemList = true;
 	}
 
 	private void addStackToClientList(StoredItemStack is) {
@@ -334,9 +357,9 @@ public abstract class AbstractStorageTerminalScreen<T extends StorageTerminalMen
 			if(!menu.noSort) {
 				List<StoredItemStack> list = getMenu().itemListClientSorted;
 				Object2IntMap<StoredItemStack> map = new Object2IntOpenHashMap<>();
-				map.defaultReturnValue(Integer.MAX_VALUE);
-				for (int m = 0; m < list.size(); m++) {
-					map.put(list.get(m), m);
+				int index = -Integer.MAX_VALUE;
+				for (StoredItemStack stored : list) {
+					map.put(stored, index++);
 				}
 				sortComp = Comparator.comparing(map::getInt);
 				menu.noSort = true;
@@ -411,6 +434,9 @@ public abstract class AbstractStorageTerminalScreen<T extends StorageTerminalMen
 		int slotHover = -1;
 		for (int i = 0;i < term.storageSlotList.size();i++) {
 			if(drawSlot(st, term.storageSlotList.get(i), mouseX, mouseY))slotHover = i;
+		}
+		for (Renderable renderable : postRenders) {
+			renderable.render(this, () -> term.storageSlotList, st, mouseX, mouseY);
 		}
 		return slotHover;
 	}
@@ -662,5 +688,9 @@ public abstract class AbstractStorageTerminalScreen<T extends StorageTerminalMen
 			return fakeSlotUnderMouse;
 		}
 		return null;
+	}
+
+	public interface Renderable {
+		void render(AbstractStorageTerminalScreen<?> screen, Supplier<List<SlotStorage>> slotsGetter, GuiGraphics draw, int mouseX, int mouseY);
 	}
 }

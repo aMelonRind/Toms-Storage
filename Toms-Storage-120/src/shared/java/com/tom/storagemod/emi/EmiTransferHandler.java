@@ -46,7 +46,7 @@ public class EmiTransferHandler implements StandardRecipeHandler<CraftingTermina
 	public EmiPlayerInventory getInventory(AbstractContainerScreen<CraftingTerminalMenu> screen) {
 		List<EmiStack> stacks = new ArrayList<>();
 		screen.getMenu().slots.subList(1, screen.getMenu().slots.size()).stream().map(Slot::getItem).map(EmiStack::of).forEach(stacks::add);
-		screen.getMenu().getStoredItems().forEach(s -> stacks.add(EmiStack.of(s.getStack(), s.getQuantity())));
+//		screen.getMenu().getStoredItems().forEach(s -> stacks.add(EmiStack.of(s.getStack(), s.getQuantity())));
 		return new EmiPlayerInventory(stacks);
 	}
 
