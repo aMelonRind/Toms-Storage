@@ -210,6 +210,11 @@ public class StorageTerminalMenu extends PlatformRecipeMenu implements IDataRece
 			itemList = sync.getAsList();
 			if(noSort) {
 				itemListClient.forEach(s -> s.setCount(sync.getAmount(s)));
+				for (StoredItemStack stack : itemList) {
+					if (!itemListClient.contains(stack)) {
+						itemListClient.add(stack);
+					}
+				}
 			} else {
 				itemListClient = new ArrayList<>(itemList);
 			}
