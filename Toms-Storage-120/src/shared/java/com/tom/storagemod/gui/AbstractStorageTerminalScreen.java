@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -481,42 +482,52 @@ public abstract class AbstractStorageTerminalScreen<T extends StorageTerminalMen
 		return this.getMenu().itemListClientSorted.size() > rowCount * 9;
 	}
 
+	private boolean ifStackPresent(int slotId, Consumer<StoredItemStack> action) {
+		StoredItemStack stored = getMenu().getSlotByID(slotId).stack;
+		if (stored != null && stored.getQuantity() > 0) {
+			action.accept(stored);
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 		searchField.setFocused(false);
+		boolean spacePressed = GLFW.glfwGetKey(mc.getWindow().getWindow(), GLFW.GLFW_KEY_SPACE) != GLFW.GLFW_RELEASE;
 		if (slotIDUnderMouse > -1) {
-			if (isPullOne(mouseButton)) {
-				if (getMenu().getSlotByID(slotIDUnderMouse).stack != null && getMenu().getSlotByID(slotIDUnderMouse).stack.getQuantity() > 0) {
-					storageSlotClick(getMenu().getSlotByID(slotIDUnderMouse).stack, SlotAction.PULL_ONE, isTransferOne(mouseButton));
-					return true;
-				}
-				return true;
+			if (spacePressed) {
+				if (ifStackPresent(slotIDUnderMouse, stored -> {
+					for (int i = 0; i < 9; i++) {
+						storageSlotClick(stored, SlotAction.SHIFT_PULL, false);
+					}
+				})) return true;
+			} else if (isPullOne(mouseButton)) {
+				ifStackPresent(slotIDUnderMouse, stored -> {
+					storageSlotClick(stored, SlotAction.PULL_ONE, isTransferOne(mouseButton));
+				});
 			} else if (pullHalf(mouseButton)) {
 				if (!menu.getCarried().isEmpty()) {
 					storageSlotClick(null, hasControlDown() ? SlotAction.GET_QUARTER : SlotAction.GET_HALF, false);
 				} else {
-					if (getMenu().getSlotByID(slotIDUnderMouse).stack != null && getMenu().getSlotByID(slotIDUnderMouse).stack.getQuantity() > 0) {
-						storageSlotClick(getMenu().getSlotByID(slotIDUnderMouse).stack, hasControlDown() ? SlotAction.GET_QUARTER : SlotAction.GET_HALF, false);
-						return true;
-					}
+					if (ifStackPresent(slotIDUnderMouse, stored -> {
+						storageSlotClick(stored, hasControlDown() ? SlotAction.GET_QUARTER : SlotAction.GET_HALF, false);
+					})) return true;
 				}
 			} else if (pullNormal(mouseButton)) {
 				if (!menu.getCarried().isEmpty()) {
 					storageSlotClick(null, SlotAction.PULL_OR_PUSH_STACK, false);
 				} else {
-					if (getMenu().getSlotByID(slotIDUnderMouse).stack != null) {
-						if (getMenu().getSlotByID(slotIDUnderMouse).stack.getQuantity() > 0) {
-							storageSlotClick(getMenu().getSlotByID(slotIDUnderMouse).stack, hasShiftDown() ? SlotAction.SHIFT_PULL : SlotAction.PULL_OR_PUSH_STACK, false);
-							return true;
-						}
-					}
+					if (ifStackPresent(slotIDUnderMouse, stored -> {
+						storageSlotClick(stored, hasShiftDown() ? SlotAction.SHIFT_PULL : SlotAction.PULL_OR_PUSH_STACK, false);
+					})) return true;
 				}
 			}
-		} else if (GLFW.glfwGetKey(mc.getWindow().getWindow(), GLFW.GLFW_KEY_SPACE) != GLFW.GLFW_RELEASE) {
-			storageSlotClick(null, SlotAction.SPACE_CLICK, false);
+//		} else if (spacePressed) {
+//			storageSlotClick(null, SlotAction.SPACE_CLICK, false);
 		} else {
 			if (isHovering(searchField.getX() - leftPos, searchField.getY() - topPos, 89, this.getFont().lineHeight, mouseX, mouseY)) {
-				if(mouseButton == 1) {
+				if (mouseButton == 1) {
 					searchField.setValue("");
 					searchField.setFocused(true);
 				} else {
