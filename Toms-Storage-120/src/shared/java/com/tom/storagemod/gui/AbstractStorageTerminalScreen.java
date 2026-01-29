@@ -483,6 +483,7 @@ public abstract class AbstractStorageTerminalScreen<T extends StorageTerminalMen
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+		searchField.setFocused(false);
 		if (slotIDUnderMouse > -1) {
 			if (isPullOne(mouseButton)) {
 				if (getMenu().getSlotByID(slotIDUnderMouse).stack != null && getMenu().getSlotByID(slotIDUnderMouse).stack.getQuantity() > 0) {
@@ -515,12 +516,13 @@ public abstract class AbstractStorageTerminalScreen<T extends StorageTerminalMen
 			storageSlotClick(null, SlotAction.SPACE_CLICK, false);
 		} else {
 			if (isHovering(searchField.getX() - leftPos, searchField.getY() - topPos, 89, this.getFont().lineHeight, mouseX, mouseY)) {
-				if(mouseButton == 1)
+				if(mouseButton == 1) {
 					searchField.setValue("");
-				else
+					searchField.setFocused(true);
+				} else {
 					return super.mouseClicked(mouseX, mouseY, mouseButton);
+				}
 			} else {
-				searchField.setFocused(false);
 				return super.mouseClicked(mouseX, mouseY, mouseButton);
 			}
 		}
