@@ -30,7 +30,8 @@ import java.util.function.Predicate;
 @EmiEntrypoint
 public class EMIPlugin implements EmiPlugin {
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public void register(EmiRegistry registry) {
 		registry.addWorkstation(VanillaEmiRecipeCategories.CRAFTING, EmiStack.of(Content.craftingTerminal.get()));
 		registry.addRecipeHandler(Content.craftingTerminalCont.get(), new EmiTransferHandler());
@@ -41,6 +42,34 @@ public class EMIPlugin implements EmiPlugin {
 				if(sl != null)return new EmiStackInteraction(EmiStack.of(sl.getItem()), null, false);
 			}
 			return EmiStackInteraction.EMPTY;
+		});
+
+		Consumer listener = s -> {
+			if (s instanceof AbstractStorageTerminalScreen<?> ast) {
+				ast.markDirty();
+			}
+		};
+		EmiSlotOverlay.addChangeListener(Content.storageTerminal.get(), listener);
+		EmiSlotOverlay.addChangeListener(Content.craftingTerminalCont.get(), listener);
+	}
+
+	static {
+		IAutoFillTerminal.updateSearch.add(new ISearchHandler() {
+
+			@Override
+			public void setSearch(String set) {
+				EmiApi.setSearchText(set);
+			}
+
+			@Override
+			public String getSearch() {
+				return EmiApi.getSearchText();
+			}
+
+			@Override
+			public String getName() {
+				return "EMI";
+			}
 		});
 
 		AbstractStorageTerminalScreen.postRenders.add((
@@ -67,14 +96,6 @@ public class EMIPlugin implements EmiPlugin {
 			draw.pose().popPose();
 		});
 
-		Consumer listener = s -> {
-			if (s instanceof AbstractStorageTerminalScreen<?> ast) {
-				ast.markDirty();
-			}
-		};
-		EmiSlotOverlay.addChangeListener(Content.storageTerminal.get(), listener);
-		EmiSlotOverlay.addChangeListener(Content.craftingTerminalCont.get(), listener);
-
 		AbstractStorageTerminalScreen.externalSortProviders.add(() -> {
 			Function<StoredItemStack, Integer> extractor;
 			if (EmiApi.isSearchHighlightActive()) {
@@ -98,26 +119,6 @@ public class EMIPlugin implements EmiPlugin {
 			return Comparator.<StoredItemStack, Integer>comparing(
 					o -> cache.computeIfAbsent(o, extractor)
 			);
-		});
-	}
-
-	static {
-		IAutoFillTerminal.updateSearch.add(new ISearchHandler() {
-
-			@Override
-			public void setSearch(String set) {
-				EmiApi.setSearchText(set);
-			}
-
-			@Override
-			public String getSearch() {
-				return EmiApi.getSearchText();
-			}
-
-			@Override
-			public String getName() {
-				return "EMI";
-			}
 		});
 	}
 }
